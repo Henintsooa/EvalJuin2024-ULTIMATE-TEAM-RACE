@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title></title>
-  <!-- <link rel="shortcut icon" type="image/png" href="../assets/images/logos/favicon.png" /> -->
+  <link rel="shortcut icon" type="image/png" href="../assets/images/logos/logo.png" /> 
   <link rel="stylesheet" href="../assets/css/styles.min.css" />
 </head>
 
@@ -18,9 +18,9 @@
     <aside class="left-sidebar">
       <!-- Sidebar scroll-->
       <div>
-        <div class="brand-logo d-flex align-items-center justify-content-between">
+        <div class="brand-logo d-flex align-items-center justify-content-between"  style="margin-top: 60px;">
           <a href="./index.html" class="text-nowrap logo-img">
-            <!-- <img src="../assets/images/logos/dark-logo.svg" width="180" alt="" /> -->
+            <img src="../assets/images/logos/logo.png" width="200" alt="" /> 
           </a>
           <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
             <i class="ti ti-x fs-8"></i>
@@ -33,12 +33,44 @@
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
               <span class="hide-menu">Home</span>
             </li>
+            @if(Auth::user()->status ?? '' == 'admin')
             <li class="sidebar-item">
-              <a class="sidebar-link" href="" aria-expanded="false">
+              <a class="sidebar-link" href="{{route('dashboard_admin')}}" aria-expanded="false">
                 <span>
                   <i class="ti ti-layout-dashboard"></i>
                 </span>
-                <span class="hide-menu">Vente Billet</span>
+                <span class="hide-menu">Etapes</span>
+              </a>
+            </li>
+            
+            @elseif(session()->has('equipe'))
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{{route('indexEquipe')}}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-layout-dashboard"></i>
+                </span>
+                <span class="hide-menu">Etapes</span>
+              </a>
+            </li>
+            @endif
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{{route('classement')}}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-layout-dashboard"></i>
+                </span>
+                <span class="hide-menu">Classement</span>
+              </a>
+            </li>
+            <li class="nav-small-cap">
+              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+              <span class="hide-menu">AUTH</span>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{{ route('GETlogout') }}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-login"></i>
+                </span>
+                <span class="hide-menu">Logout</span>
               </a>
             </li>
           </ul>
@@ -80,37 +112,7 @@
               </form>
             </div>
           </div>
-          <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
-            <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-              <li class="nav-item dropdown">
-                <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
-                  aria-expanded="false">
-                  <img src="../assets/images/profile/user-1.jpg" alt="" width="35" height="35" class="rounded-circle">
-                </a>
-                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
-                  <div class="message-body">
-                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
-                      <i class="ti ti-user fs-6"></i>
-                      <p class="mb-0 fs-3">Profile</p>
-                    </a>
-                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
-                      <i class="ti ti-mail fs-6"></i>
-                      <p class="mb-0 fs-3">Compte</p>
-                    </a>
-                    {{-- <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
-                      <i class="ti ti-list-check fs-6"></i>
-                      <p class="mb-0 fs-3">My Task</p>
-                    </a> --}}
-                    <form method="POST" action="{{ route('logout') }}">
-                      @csrf
-                      <button type="submit" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</button>
-                    </form>
-                  
-                  </div>
-                </div>
-              </li>
-            </ul>
-          </div>
+          
         </nav>
       </header>
       <!--  Header End -->

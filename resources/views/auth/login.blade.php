@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin</title>
+  <title>Equipe</title>
   <link rel="shortcut icon" type="image/png" href="../assets/images/logos/logo.png" />
   <link rel="stylesheet" href="../assets/css/styles.min.css" />
 </head>
@@ -26,7 +26,7 @@
                 <p class="text-center">ULTIMATE TEAM RACE</p>
                 <!-- Session Status -->
                 <x-auth-session-status class="mb-4" :status="session('status')" />
-                <form method="GET" action="{{ route('loginEquipe') }}">
+                <form method="POST" action="{{ route('loginEquipe') }}">
                     @csrf
                   <div class="mb-3">
                     <label for="exampleInputEquipe1" class="form-label">Equipe</label>

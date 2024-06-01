@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\Equipe;
+use App\Models\Etape;
+use App\Models\ViewClassementGenerale;
+use App\Models\ViewClassementGeneraleEtape;
 
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
@@ -32,8 +35,9 @@ class HomeController extends Controller
         if (!Auth::check()) {
             return redirect()->route('login'); 
         }
-        
-        return view('html.adminIndex'); 
+        $coureurs = DB::table('coureur')->get();
+        $etapes = DB::table('etape')->orderBy('rang', 'asc')->get();
+        return view('html.adminIndex',['etapes'=>$etapes,'coureurs'=>$coureurs]); 
     }
 
     public function user()
@@ -41,7 +45,7 @@ class HomeController extends Controller
         if (!Auth::check()) {
             return redirect()->route('login'); 
         }
-      
+        
         return view('html.index'); 
     }
 
@@ -70,21 +74,35 @@ class HomeController extends Controller
             ['password', $request->password]
         ])->first();
         if (!$equipe) {
-        $equipeExists = Equipe::where('identifiant', $request->equipe)->exists();
-        if ($equipeExists) {
-            return redirect()->back()->withErrors([
-                'mdp' => "Le mot de passe est incorrect"
-            ])->withInput();
-        } else {
-            return redirect()->back()->withErrors([
-                'identifiant' => "L'identifiant de l'équipe est incorrect"
-            ])->withInput();
+            $equipeExists = Equipe::where('identifiant', $request->equipe)->exists();
+            if ($equipeExists) {
+                return redirect()->back()->withErrors([
+                    'mdp' => "Le mot de passe est incorrect"
+                ])->withInput();
+            } else {
+                return redirect()->back()->withErrors([
+                    'identifiant' => "L'identifiant de l'équipe est incorrect"
+                ])->withInput();
+            }
         }
-    }
-        
         Session::put('equipe', $equipe);
-        return view('html.index');  
+        return redirect()->route('indexEquipe');  
 
+    }
+    public function indexEquipe()
+    {
+        $etapes = DB::table('etape')->orderBy('rang', 'asc')->get();
+        return view('html.index',['etapes'=>$etapes]);   
+    }
+
+    public function classement()
+    {
+        if (!Auth::check() && !$idequipe = session('equipe')['idequipe']) {
+            return redirect()->route('login')->with('error', 'Veuillez vous connecter en tant qu\'administrateur ou comme un client pour accéder à cette page.');
+        }
+        $classementGenerales = ViewClassementGenerale::all();
+        $classementGeneraleEtapes = ViewClassementGeneraleEtape::all();
+        return view('html.classement', ['classementGenerales' => $classementGenerales, 'classementGeneraleEtapes' => $classementGeneraleEtapes]);
     }
 
     public function reset()
