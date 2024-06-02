@@ -10,8 +10,10 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\Equipe;
 use App\Models\Etape;
+use App\Models\ViewClassementGeneraleCoureur;
 use App\Models\ViewClassementGenerale;
-use App\Models\ViewClassementGeneraleEtape;
+use App\Models\ViewPointsCoureurEtape;
+use App\Models\ViewEtapeCoureur;
 
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
@@ -91,8 +93,9 @@ class HomeController extends Controller
     }
     public function indexEquipe()
     {
+        $equipecoureurs=DB::table('viewetapecoureur')->where('idequipe',session('equipe')['idequipe'])->orderBy('rang', 'asc')->get();
         $etapes = DB::table('etape')->orderBy('rang', 'asc')->get();
-        return view('html.index',['etapes'=>$etapes]);   
+        return view('html.index',['etapes'=>$etapes,'equipecoureurs'=>$equipecoureurs]);   
     }
 
     public function classement()
@@ -100,11 +103,19 @@ class HomeController extends Controller
         if (!Auth::check() && !$idequipe = session('equipe')['idequipe']) {
             return redirect()->route('login')->with('error', 'Veuillez vous connecter en tant qu\'administrateur ou comme un client pour accéder à cette page.');
         }
-        $classementGenerales = ViewClassementGenerale::all();
-        $classementGeneraleEtapes = ViewClassementGeneraleEtape::all();
-        return view('html.classement', ['classementGenerales' => $classementGenerales, 'classementGeneraleEtapes' => $classementGeneraleEtapes]);
+        $classementGeneraleCoureurs = ViewClassementGeneraleCoureur::all();
+        $classementGeneraleEtapes = ViewPointsCoureurEtape::all();
+        $classementParEtape = $classementGeneraleEtapes->groupBy('rangetape');
+        return view('html.classement', ['classementGeneraleCoureurs' => $classementGeneraleCoureurs,'classementParEtape' => $classementParEtape]);
     }
-
+    public function classementEquipe()
+    {
+        if (!Auth::check() && !$idequipe = session('equipe')['idequipe']) {
+            return redirect()->route('login')->with('error', 'Veuillez vous connecter en tant qu\'administrateur ou comme un client pour accéder à cette page.');
+        }
+        $classementGenerales = ViewClassementGenerale::all();
+        return view('html.classementEquipe', ['classementGenerales' => $classementGenerales]);
+    }
     public function reset()
     {
         DB::statement('SET FOREIGN_KEY_CHECKS=0');

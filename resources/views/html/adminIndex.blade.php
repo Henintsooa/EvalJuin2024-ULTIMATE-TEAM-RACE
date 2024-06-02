@@ -2,6 +2,8 @@
 @section('main')
       <!--  Header End -->
       <div class="container-fluid">
+        <h3>Bienvenue {{ Auth::user()->name }}</h3>
+        <br>
         <!--  Row 1 -->
         <div class="row">
           <div class="col-lg-12 d-flex align-items-stretch">
@@ -41,6 +43,10 @@
                       <td class="border-bottom-0">
                           <p class="mb-0 fw-normal">{{ $etape->nbcoureur  }}</p>
                       </td>
+
+                      <td class="border-bottom-0">
+                        <a href="{{route('affecterTemps', ['idEtape' => $etape->idetape]) }}" class="btn btn-primary btn-sm">Affecter temps coureur</a>
+                      </td>
                   </tr>
                   @endforeach
                 </tbody>
@@ -50,7 +56,7 @@
           </div>
         </div>
 
-        <div class="col-lg-8 d-flex align-items-stretch">
+        {{-- <div class="col-lg-8 d-flex align-items-stretch">
           @if(session()->has('success'))
           <div class="alert alert-success" role="alert">
               {{ session()->get('success') }}
@@ -66,8 +72,8 @@
               </ul>
           </div>
           @endif
-      </div>
-      <div class="col-lg-8 d-flex align-items-stretch">
+      </div> --}}
+      {{-- <div class="col-lg-8 d-flex align-items-stretch">
           <div class="card w-100">
               <div class="card-body p-6">
                   <h5 class="card-title fw-semibold mb-4">Affecter temps</h5>
@@ -109,19 +115,19 @@
                           @error('heureArrivee')
                           <div class="text-danger">{{ $message }}</div>
                           @enderror
-                      </div> 
-                      <div class="mb-3">
+                      </div>  --}}
+                      {{-- <div class="mb-3">
                           <input class="form-check-input" type="radio" name="lendemain" value="1" {{ old('lendemain') == '1' ? 'checked' : '' }}>
                           <label class="form-check-label">Lendemain</label>
-                      </div>  
-                      <button type="submit" class="btn btn-primary">Valider</button>
+                      </div>   --}}
+                      {{-- <button type="submit" class="btn btn-primary">Valider</button>
                     </form>
 
   
                   </div>
               </div>
           </div>
-        </div>
+        </div> --}}
       </div>  
 </body>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

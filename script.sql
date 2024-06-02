@@ -14,11 +14,10 @@ CREATE TABLE Etape (
     longueur NUMERIC(20,2) NOT NULL,
     nbCoureur int NOT NULL,
     rang int NOT NULL,
-    rangPoints int[] default '{}'
 );
-INSERT INTO Etape (nomEtape, longueur, nbCoureur, rang, rangPoints) VALUES ('Etape de Betsizaraina', 30.5, 2, 1, '{10, 6, 4, 2, 1}');
-INSERT INTO Etape (nomEtape, longueur, nbCoureur, rang, rangPoints) VALUES ('Etape de Vatomandry', 45, 2, 2, '{12, 10, 8, 6, 4}');
-INSERT INTO Etape (nomEtape, longueur, nbCoureur, rang, rangPoints) VALUES ('Etape d''Ampasimbe', 35, 1, 3, '{10, 8, 6, 5, 4}');
+INSERT INTO Etape (nomEtape, longueur, nbCoureur, rang, rangPoints) VALUES ('Etape de Betsizaraina', 30.5, 2, 1);
+INSERT INTO Etape (nomEtape, longueur, nbCoureur, rang, rangPoints) VALUES ('Etape de Vatomandry', 45, 2, 2);
+INSERT INTO Etape (nomEtape, longueur, nbCoureur, rang, rangPoints) VALUES ('Etape d''Ampasimbe', 35, 1, 3);
 
 CREATE TABLE EtapePoints (
     idEtapePoints SERIAL PRIMARY KEY,
@@ -33,17 +32,17 @@ INSERT INTO EtapePoints (idEtape, rang, points) VALUES (1, 3, 4);
 INSERT INTO EtapePoints (idEtape, rang, points) VALUES (1, 4, 2);
 INSERT INTO EtapePoints (idEtape, rang, points) VALUES (1, 5, 1);
 
-INSERT INTO EtapePoints (idEtape, rang, points) VALUES (2, 1, 12);
-INSERT INTO EtapePoints (idEtape, rang, points) VALUES (2, 2, 10);
-INSERT INTO EtapePoints (idEtape, rang, points) VALUES (2, 3, 8);
-INSERT INTO EtapePoints (idEtape, rang, points) VALUES (2, 4, 6);
-INSERT INTO EtapePoints (idEtape, rang, points) VALUES (2, 5, 4);
+INSERT INTO EtapePoints (idEtape, rang, points) VALUES (2, 1, 10);
+INSERT INTO EtapePoints (idEtape, rang, points) VALUES (2, 2, 6);
+INSERT INTO EtapePoints (idEtape, rang, points) VALUES (2, 3, 4);
+INSERT INTO EtapePoints (idEtape, rang, points) VALUES (2, 4, 2);
+INSERT INTO EtapePoints (idEtape, rang, points) VALUES (2, 5, 1);
 
 INSERT INTO EtapePoints (idEtape, rang, points) VALUES (3, 1, 10);
-INSERT INTO EtapePoints (idEtape, rang, points) VALUES (3, 2, 8);
-INSERT INTO EtapePoints (idEtape, rang, points) VALUES (3, 3, 6);
-INSERT INTO EtapePoints (idEtape, rang, points) VALUES (3, 4, 5);
-INSERT INTO EtapePoints (idEtape, rang, points) VALUES (3, 5, 4);
+INSERT INTO EtapePoints (idEtape, rang, points) VALUES (3, 2, 6);
+INSERT INTO EtapePoints (idEtape, rang, points) VALUES (3, 3, 4);
+INSERT INTO EtapePoints (idEtape, rang, points) VALUES (3, 4, 2);
+INSERT INTO EtapePoints (idEtape, rang, points) VALUES (3, 5, 1);
 
 CREATE TABLE Coureur (
     idCoureur SERIAL PRIMARY KEY,
@@ -72,6 +71,32 @@ INSERT INTO Categorie (nomCategorie) VALUES ('Homme');
 INSERT INTO Categorie (nomCategorie) VALUES ('Femme');
 INSERT INTO Categorie (nomCategorie) VALUES ('Junior');
 INSERT INTO Categorie (nomCategorie) VALUES ('Senior');
+
+CREATE TABLE CategorieCoureur (
+    idCategorieCoureur SERIAL PRIMARY KEY,
+    idCoureur int NOT NULL,
+    idCategorie int NOT NULL,
+    FOREIGN KEY (idCoureur) REFERENCES Coureur(idCoureur),
+    FOREIGN KEY (idCategorie) REFERENCES Categorie(idCategorie)
+);
+INSERT INTO CategorieCoureur (idCoureur, idCategorie) VALUES (1, 1);
+INSERT INTO CategorieCoureur (idCoureur, idCategorie) VALUES (2,2);
+
+INSERT INTO CategorieCoureur (idCoureur, idCategorie) VALUES (3, 1);
+INSERT INTO CategorieCoureur (idCoureur, idCategorie) VALUES (4,2);
+
+INSERT INTO CategorieCoureur (idCoureur, idCategorie) VALUES (5, 1);
+INSERT INTO CategorieCoureur (idCoureur, idCategorie) VALUES (6,2);
+------------------------
+INSERT INTO CategorieCoureur (idCoureur, idCategorie) VALUES (1, 4);
+INSERT INTO CategorieCoureur (idCoureur, idCategorie) VALUES (2,4);
+
+INSERT INTO CategorieCoureur (idCoureur, idCategorie) VALUES (3, 3);
+INSERT INTO CategorieCoureur (idCoureur, idCategorie) VALUES (4,4);
+
+INSERT INTO CategorieCoureur (idCoureur, idCategorie) VALUES (5, 4);
+INSERT INTO CategorieCoureur (idCoureur, idCategorie) VALUES (6,4);
+
 
 -- CREATE TABLE EquipeCoureur (
 --     idEquipeCoureur SERIAL PRIMARY KEY,
@@ -109,80 +134,211 @@ CREATE TABLE ResultatCoureur (
     FOREIGN KEY (idEtape) REFERENCES Etape(idEtape)
 );
 
+-----------------View qui donne le classement d'un coureur dans une etape par rapport aux durees
+-- CREATE OR REPLACE View ViewClassementCoureurEtape AS
+-- SELECT
+--     rc.idEtape,
+--     et.rang AS rangEtape,
+--     SUM(rc.duree) AS dureeEtape,
+--     rc.idcoureur,
+-- 	c.nomcoureur,
+--     ROW_NUMBER() OVER(PARTITION BY rc.idEtape ORDER BY SUM(rc.duree)) AS classement
+-- FROM
+--     ResultatCoureur rc
+-- JOIN
+--     Coureur c ON rc.idCoureur = c.idCoureur
+-- JOIN Etape et ON rc.idEtape = et.idEtape 
+-- GROUP BY
+--     rc.idEtape,
+--     rc.idcoureur,
+-- 	c.nomcoureur,
+--     et.rang
+-- ORDER BY
+--     rc.idEtape ASC;
 
--- CREATE OR REPLACE View ViewResultatEquipeEtape AS
--- select rc.idEtape, sum(rc.duree) as dureeEtape,e.nomEquipe
--- from ResultatCoureur rc
--- join Coureur c on rc.idCoureur = c.idCoureur
--- join Equipe e on c.idEquipe = e.idEquipe
--- group by rc.idEtape,e.nomEquipe order by rc.idEtape asc;
-
------------------View qui donne le classement d'une equipe dans une etape par rapport aux durees
-CREATE OR REPLACE View ViewClassementEquipeEtape AS
+CREATE OR REPLACE VIEW ViewClassementCoureurEtape AS
 SELECT
     rc.idEtape,
     et.rang AS rangEtape,
     SUM(rc.duree) AS dureeEtape,
-    e.nomEquipe,
-    ROW_NUMBER() OVER(PARTITION BY rc.idEtape ORDER BY SUM(rc.duree)) AS classement
+    rc.idcoureur,
+    c.nomcoureur,
+    DENSE_RANK() OVER(PARTITION BY rc.idEtape ORDER BY SUM(rc.duree)) AS classement
 FROM
     ResultatCoureur rc
 JOIN
     Coureur c ON rc.idCoureur = c.idCoureur
 JOIN
-    Equipe e ON c.idEquipe = e.idEquipe
-JOIN Etape et ON rc.idEtape = et.idEtape
+    Etape et ON rc.idEtape = et.idEtape 
 GROUP BY
     rc.idEtape,
-    e.nomEquipe,
+    rc.idcoureur,
+    c.nomcoureur,
     et.rang
 ORDER BY
     rc.idEtape ASC;
-
     
------------------View qui donne les points par rapport aux classements d'une equipe dans une etape 
-CREATE OR REPLACE VIEW ViewPointsEquipeEtape AS
+-----------------View qui donne les points par rapport aux classements d'un coureur dans une etape 
+CREATE OR REPLACE VIEW ViewPointsCoureurEtape AS
 SELECT
+    et.nomEtape,
     v.idEtape,
     v.rangEtape,
-    v.nomEquipe,
+    v.nomcoureur,
+    v.dureeEtape,
     v.classement,
-    SUM(ep.points) AS points
+    v.idcoureur,
+    e.nomEquipe,
+    COALESCE(SUM(ep.points), 0) AS points
 FROM
-    ViewClassementEquipeEtape v
-JOIN
+    ViewClassementCoureurEtape v
+LEFT JOIN
     EtapePoints ep ON v.idEtape = ep.idEtape AND v.classement = ep.rang
+JOIN coureur c on c.idcoureur= v.idcoureur
+JOIN equipe e on e.idequipe=c.idequipe
+JOIN etape et ON et.idetape = v.idetape
 GROUP BY
+	et.nomEtape,
     v.idEtape,
     v.rangEtape,
-    v.nomEquipe,
-    v.classement;
+    v.nomcoureur,
+    v.dureeEtape,
+    v.classement,
+    v.idcoureur,
+    e.nomEquipe
+ORDER BY v.idEtape, v.classement ASC; 
 
-
-CREATE OR REPLACE VIEW ViewClassementGeneralEtape AS
+--------------ou 
 SELECT
-    nomEquipe,
-    ROW_NUMBER() OVER (ORDER BY SUM(points) DESC) AS classementGeneral,
-    SUM(CASE WHEN rangEtape = 1 THEN points ELSE 0 END) AS pointsEtape1,
-    SUM(CASE WHEN rangEtape = 2 THEN points ELSE 0 END) AS pointsEtape2,
-    SUM(CASE WHEN rangEtape = 3 THEN points ELSE 0 END) AS pointsEtape3,
-    SUM(CASE WHEN rangEtape = 4 THEN points ELSE 0 END) AS pointsEtape4,
-    SUM(CASE WHEN rangEtape = 5 THEN points ELSE 0 END) AS pointsEtape5
+    et.nomEtape,
+    v.idEtape,
+    v.rangEtape,
+    v.nomcoureur,
+    v.dureeEtape,
+    v.classement,
+    v.idcoureur,
+    e.nomEquipe,
+    CASE 
+        WHEN v.classement = 1 THEN 10
+        WHEN v.classement = 2 THEN 6
+        WHEN v.classement = 3 THEN 4
+        WHEN v.classement = 4 THEN 2
+        WHEN v.classement = 5 THEN 1
+        ELSE 0
+    END AS points
 FROM
-    ViewPointsEquipeEtape
-GROUP BY
-    nomEquipe;
+    ViewClassementCoureurEtape v
+JOIN
+    Coureur c ON c.idcoureur = v.idcoureur
+JOIN
+    Equipe e ON e.idequipe = c.idequipe
+JOIN etape et ON et.idetape = v.idetape
+ORDER BY
+    v.idEtape, v.classement ASC;
+-----------------------------
 
 CREATE OR REPLACE VIEW ViewClassementGeneral AS
 SELECT
-    nomEquipe,
-    ROW_NUMBER() OVER (ORDER BY SUM(points) DESC) AS classementGeneral,
+    v.nomEquipe,
+    DENSE_RANK() OVER (ORDER BY SUM(points) DESC) AS classementGeneral,
     SUM(points) AS totalPoints
 FROM
-    ViewPointsEquipeEtape
+    ViewPointsCoureurEtape v
 GROUP BY
-    nomEquipe;
+    v.nomEquipe;
 
+--------------------------- Classement generale coureur
+CREATE OR REPLACE VIEW ViewClassementGeneralCoureur AS
+
+SELECT
+    c.nomcoureur,
+    DENSE_RANK() OVER (ORDER BY SUM(points) DESC) AS classementGeneral,
+    SUM(points) AS totalPoints
+FROM
+    ViewPointsCoureurEtape v
+JOIN coureur c on c.idcoureur= v.idcoureur
+GROUP BY
+    c.nomcoureur;
+
+--------------------------- Details etape coureur
+
+CREATE OR REPLACE View ViewEtapeCoureur as
+SELECT e.rang,e.idetape,e.nomEtape,eq.idEquipe,eq.nomEquipe,c.idcoureur,c.nomCoureur
+FROM etape e
+JOIN etapecoureur ec ON ec.idetape = e.idetape
+JOIN coureur c ON ec.idcoureur = c.idcoureur
+JOIN equipe eq ON eq.idequipe = c.idequipe;
 
 -- ROW_NUMBER() OVER(PARTITION BY rc.idEtape ORDER BY SUM(rc.duree) DESC) AS classement
 
+select etape.*,coureur.nomCoureur 
+from etape
+join etapecoureur on etape.idEtape = etapecoureur.idEtape
+join coureur on etapecoureur.idCoureur = coureur.idCoureur
+
+
+
+INSERT INTO "public".resultatcoureur( idresultatcoureur, idcoureur, idetape, heuredebut, heurefin, duree ) VALUES ( 13, 1, 1, '10:25:34', '12:25:35', 7201);
+INSERT INTO "public".resultatcoureur( idresultatcoureur, idcoureur, idetape, heuredebut, heurefin, duree ) VALUES ( 14, 2, 1, '10:25:34', '12:30:34', 7500);
+INSERT INTO "public".resultatcoureur( idresultatcoureur, idcoureur, idetape, heuredebut, heurefin, duree ) VALUES ( 15, 3, 1, '10:25:34', '12:30:00', 7466);
+INSERT INTO "public".resultatcoureur( idresultatcoureur, idcoureur, idetape, heuredebut, heurefin, duree ) VALUES ( 16, 5, 1, '10:25:34', '12:45:00', 8366);
+INSERT INTO "public".resultatcoureur( idresultatcoureur, idcoureur, idetape, heuredebut, heurefin, duree ) VALUES ( 18, 4, 1, '10:25:34', '12:40:00', 8066);
+INSERT INTO "public".resultatcoureur( idresultatcoureur, idcoureur, idetape, heuredebut, heurefin, duree ) VALUES ( 19, 6, 1, '10:25:34', '12:50:34', 8700);
+INSERT INTO "public".resultatcoureur( idresultatcoureur, idcoureur, idetape, heuredebut, heurefin, duree ) VALUES ( 20, 1, 2, '12:25:36', '15:00:00', 9264);
+INSERT INTO "public".resultatcoureur( idresultatcoureur, idcoureur, idetape, heuredebut, heurefin, duree ) VALUES ( 21, 2, 2, '12:30:35', '15:15:00', 9865);
+INSERT INTO "public".resultatcoureur( idresultatcoureur, idcoureur, idetape, heuredebut, heurefin, duree ) VALUES ( 22, 3, 2, '12:30:01', '15:30:00', 10799);
+INSERT INTO "public".resultatcoureur( idresultatcoureur, idcoureur, idetape, heuredebut, heurefin, duree ) VALUES ( 23, 5, 2, '12:45:01', '15:40:00', 10499);
+INSERT INTO "public".resultatcoureur( idresultatcoureur, idcoureur, idetape, heuredebut, heurefin, duree ) VALUES ( 24, 4, 2, '12:40:01', '15:20:00', 9599);
+INSERT INTO "public".resultatcoureur( idresultatcoureur, idcoureur, idetape, heuredebut, heurefin, duree ) VALUES ( 25, 6, 2, '12:50:35', '15:25:35', 9300);
+INSERT INTO "public".resultatcoureur( idresultatcoureur, idcoureur, idetape, heuredebut, heurefin, duree ) VALUES ( 26, 1, 3, '15:00:01', '01:00:00', 35999);
+INSERT INTO "public".resultatcoureur( idresultatcoureur, idcoureur, idetape, heuredebut, heurefin, duree ) VALUES ( 28, 3, 3, '15:15:01', '01:15:00', 35999);
+INSERT INTO "public".resultatcoureur( idresultatcoureur, idcoureur, idetape, heuredebut, heurefin, duree ) VALUES ( 29, 4, 3, '15:20:01', '01:30:00', 36599);
+
+INSERT INTO "public".resultatcoureur(idresultatcoureur, idcoureur, idetape, heuredebut, heurefin, duree)
+VALUES
+(13, 1, 1, '10:25:34', '12:25:35', '7201 seconds'::interval),
+(14, 2, 1, '10:25:34', '12:30:34', '7500 seconds'::interval),
+(15, 3, 1, '10:25:34', '12:30:00', '7466 seconds'::interval),
+(16, 5, 1, '10:25:34', '12:45:00', '8366 seconds'::interval),
+(18, 4, 1, '10:25:34', '12:40:00', '8066 seconds'::interval),
+(19, 6, 1, '10:25:34', '12:50:34', '8700 seconds'::interval),
+(20, 1, 2, '12:25:36', '15:00:00', '9264 seconds'::interval),
+(21, 2, 2, '12:30:35', '15:15:00', '9865 seconds'::interval),
+(22, 3, 2, '12:30:01', '15:30:00', '10799 seconds'::interval),
+(23, 5, 2, '12:45:01', '15:40:00', '10499 seconds'::interval),
+(24, 4, 2, '12:40:01', '15:20:00', '9599 seconds'::interval),
+(25, 6, 2, '12:50:35', '15:25:35', '9300 seconds'::interval),
+(26, 1, 3, '15:00:01', '01:00:00', '35999 seconds'::interval),
+(28, 3, 3, '15:15:01', '01:15:00', '35999 seconds'::interval),
+(29, 4, 3, '15:20:01', '01:30:00', '36599 seconds'::interval);
+
+
+--------------------------------fonction import
+
+INSERT INTO "public".resultatcoureur(idresultatcoureur, idcoureur, idetape, heuredebut, heurefin)
+VALUES 
+(13, 1, 1, '10:25:34', '12:25:35'),
+(14, 2, 1, '10:25:34', '12:30:34'),
+(15, 3, 1, '10:25:34', '12:30:00'),
+(16, 5, 1, '10:25:34', '12:45:00'),
+(18, 4, 1, '10:25:34', '12:40:00'),
+(19, 6, 1, '10:25:34', '12:50:34'),
+(20, 1, 2, '12:25:36', '15:00:00'),
+(21, 2, 2, '12:30:35', '15:15:00'),
+(22, 3, 2, '12:30:01', '15:30:00'),
+(23, 5, 2, '12:45:01', '15:40:00'),
+(24, 4, 2, '12:40:01', '15:20:00'),
+(25, 6, 2, '12:50:35', '15:25:35'),
+(26, 1, 3, '15:00:01', '01:00:00'),
+(28, 3, 3, '15:15:01', '01:15:00'),
+(29, 4, 3, '15:20:01', '01:30:00');
+
+UPDATE "public".resultatcoureur
+SET duree = CASE
+    WHEN heurefin < heuredebut THEN
+        -- Calculer la durée depuis heuredebut jusqu'à minuit
+        (INTERVAL '24 hours' - heuredebut::time + heurefin::time)::time
+    ELSE
+        -- Calculer la durée normale
+        (heurefin::time - heuredebut::time)::time
+END;

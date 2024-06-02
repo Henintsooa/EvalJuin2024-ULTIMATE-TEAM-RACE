@@ -32,12 +32,21 @@ class AdminController extends Controller
         return response()->json($coureurs);
     }
 
-    public function affecterTemps(Request $request)
+    public function affecterTemps()
+    {
+        $idEtape = $_GET['idEtape'];       
+        
+        $idequipe = session('equipe')['idequipe'];
+        $coureurs = DB::table('viewetapecoureur')->where('idetape', $idEtape)->get();
+        return view('html.affecterTemps', ['coureurs' => $coureurs, 'idEtape' => $idEtape]);
+    }
+
+    public function affectationTemps(Request $request)
     {
         if (!Auth::check()) {
             return redirect()->route('login');
         }
-    
+
         $validator = Validator::make($request->all(), [
             'idCoureur' => 'required|exists:coureur,idcoureur',
             'idEtape' => 'required|exists:etape,idetape',
@@ -45,26 +54,36 @@ class AdminController extends Controller
             'heureArrivee' => 'required|date_format:H:i:s',
             'lendemain' => 'nullable|boolean'
         ]);
-    
+
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
-    
+
         // Calculate the duration between heureDepart and heureArrivee
         $heureDepart = new \DateTime($request->input('heureDepart'));
         $heureArrivee = new \DateTime($request->input('heureArrivee'));
-    
-        $dureeSeconds = 0;
 
         if ($heureArrivee < $heureDepart) {
-            // Calculate seconds from heureDepart to midnight (24:00:00)
-            $midnight = (clone $heureDepart)->setTime(24, 0, 0);
-            $dureeSeconds = $midnight->getTimestamp() - $heureDepart->getTimestamp();
-            
-            // Add seconds from midnight to heureArrivee
-            $dureeSeconds += $heureArrivee->getTimestamp() - (clone $heureArrivee)->setTime(0, 0, 0)->getTimestamp();
+            // Calculate duration from heureDepart to midnight
+            $midnight = (clone $heureDepart)->setTime(23, 59, 59);
+            $intervalToMidnight = $heureDepart->diff($midnight);
+
+            // Calculate duration from midnight to heureArrivee
+            $midnightStart = (clone $heureArrivee)->setTime(0, 0, 0);
+            $intervalFromMidnight = $midnightStart->diff($heureArrivee);
+
+            // Combine the intervals
+            $totalSeconds = ($intervalToMidnight->h * 3600 + $intervalToMidnight->i * 60 + $intervalToMidnight->s + 1) +
+                            ($intervalFromMidnight->h * 3600 + $intervalFromMidnight->i * 60 + $intervalFromMidnight->s);
+
+            $hours = floor($totalSeconds / 3600);
+            $minutes = floor(($totalSeconds % 3600) / 60);
+            $seconds = $totalSeconds % 60;
+
+            $duree = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
         } else {
-            $dureeSeconds = $heureArrivee->getTimestamp() - $heureDepart->getTimestamp();
+            $interval = $heureDepart->diff($heureArrivee);
+            $duree = $interval->format('%H:%I:%S');
         }
 
         DB::table('resultatcoureur')->insert([
@@ -72,12 +91,12 @@ class AdminController extends Controller
             'idetape' => $request->input('idEtape'),
             'heuredebut' => $request->input('heureDepart'),
             'heurefin' => $request->input('heureArrivee'),
-            'duree' => $dureeSeconds,
-            'lendemain' => $request->input('lendemain') ? 1 : 0            
+            'duree' => $duree,
         ]);
-    
+
         return redirect()->back()->with('success', 'Le temps du coureur a été affecté avec succès.');
-    }
+}
+
     
     
 }

@@ -58,8 +58,16 @@
                 <span>
                   <i class="ti ti-layout-dashboard"></i>
                 </span>
-                <span class="hide-menu">Classement</span>
+                <span class="hide-menu">Classement Général</span>
               </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{{route('classementEquipe')}}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-layout-dashboard"></i>
+                </span>
+                <span class="hide-menu">Classement Par Equipe</span>
+              </a> 
             </li>
             <li class="nav-small-cap">
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>

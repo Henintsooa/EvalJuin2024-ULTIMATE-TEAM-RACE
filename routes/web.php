@@ -7,10 +7,12 @@ use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 
 
+Route::get('/classementEquipe', [HomeController::class, 'classementEquipe'])->name('classementEquipe');
 Route::get('/classement', [HomeController::class, 'classement'])->name('classement');
 
 Route::post('/getCoureursByEtape', [AdminController::class, 'getCoureursByEtape'])->name('getCoureursByEtape');
-Route::post('/affecterTemps', [AdminController::class, 'affecterTemps'])->name('affecterTemps'); 
+Route::post('/affecterTemps', [AdminController::class, 'affectationTemps'])->name('affecterTemps'); 
+Route::get('/affecterTemps', [AdminController::class, 'affecterTemps'])->name('affecterTemps'); 
 Route::get('/indexEquipe', [HomeController::class, 'indexEquipe'])->name('indexEquipe');
 Route::post('/affecterCoureur', [EquipeController::class, 'affectationCoureur'])->name('affecterCoureur'); 
 Route::get('/affecterCoureur', [EquipeController::class, 'affecterCoureur'])->name('affecterCoureur'); 
