@@ -2,7 +2,18 @@
 @section('main')
       <!--  Header End -->
       <div class="container-fluid">
+          <h1>ULTIMATE TEAM RACE</h1>
+        <br>
+        <div class="row">
+          <div class="col-lg-12 d-flex align-items-stretch">
+            
+            <img src="../assets/images/logos/logo.png" width="700" alt="" /> 
+          </div>
+        </div>
+        <br>
         <!--  Row 1 -->
+        <h3>Bienvenue {{ $nomequipe }} </h3>
+        <br>
         <div class="row">
           <div class="col-lg-12 d-flex align-items-stretch">
             <div class="card w-100"> 

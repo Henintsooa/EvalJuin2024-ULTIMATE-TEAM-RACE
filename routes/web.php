@@ -6,6 +6,10 @@ use App\Http\Controllers\EquipeController;
 use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 
+Route::post('/insertCoureur', [AdminController::class, 'insertCoureur'])->name('insertCoureur');
+Route::get('/coureur', [AdminController::class, 'coureur'])->name('coureur'); 
+
+Route::post('/insertEtape', [AdminController::class, 'insertEtape'])->name('insertEtape');
 
 Route::get('/classementEquipe', [HomeController::class, 'classementEquipe'])->name('classementEquipe');
 Route::get('/classement', [HomeController::class, 'classement'])->name('classement');

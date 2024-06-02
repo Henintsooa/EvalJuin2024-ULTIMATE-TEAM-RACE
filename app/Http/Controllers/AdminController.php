@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\Equipe;
 use App\Models\Etape;
+use App\Models\Coureur;
 
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
@@ -95,8 +96,85 @@ class AdminController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Le temps du coureur a été affecté avec succès.');
-}
+    }
 
+    public function insertEtape(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'nomEtape' => 'required|string|max:255',
+            'rang' => 'required|integer',
+            'longueur' => 'required|numeric',
+            'nbCoureur' => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        DB::table('etape')->insert([
+            'nometape' => $request->input('nomEtape'),
+            'rang' => $request->input('rang'),
+            'longueur' => $request->input('longueur'),
+            'nbcoureur' => $request->input('nbCoureur'),
+        ]);
+
+        // Renvoyer un message de succès
+        return redirect()->back();
+    }
+    public function coureur()
+    {
+        $equipes = DB::table('equipe')->get();
+        return view('html.coureur', ['equipes' => $equipes]);
+    }   
     
-    
+    public function insertCoureur(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'nomCoureur' => 'required|string|max:255',
+            'numero' => 'required|integer',
+            'genre' => 'required|in:M,F',
+            'dateNaissance' => 'required|date',
+            'idequipe' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $idCoureur = DB::table('coureur')->insertGetId([
+            'nomcoureur' => $request->input('nomCoureur'),
+            'numero' => $request->input('numero'),
+            'genre' => $request->input('genre'),
+            'datenaissance' => $request->input('dateNaissance'),
+            'idequipe' => $request->input('idequipe'),
+        ], 'idcoureur');
+
+        $categories = [];
+        
+        if ($request->input('genre') == 'F') {
+            $categories[] = 'Femme';
+        } else {
+            $categories[] = 'Homme';
+        }
+
+        $dateNaissance = new \DateTime($request->input('dateNaissance'));
+        $anneeNaissance = $dateNaissance->format('Y');
+        if ($anneeNaissance <= 2005) {
+            $categories[] = 'Senior';
+        } else {
+            $categories[] = 'Junior';
+        }
+
+        foreach ($categories as $categorie) {
+            $categorieId = DB::table('categorie')->where('nomcategorie', $categorie)->value('idcategorie');
+            
+            DB::table('categoriecoureur')->insert([
+                'idcoureur' => $idCoureur,
+                'idcategorie' => $categorieId,
+            ]);
+        }
+
+        
+        return redirect()->back();
+    }
 }

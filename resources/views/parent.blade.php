@@ -42,7 +42,15 @@
                 <span class="hide-menu">Etapes</span>
               </a>
             </li>
-            
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{{route('coureur')}}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-layout-dashboard"></i>
+                </span>
+                <span class="hide-menu">Coureur</span>
+              </a>
+            </li>
+
             @elseif(session()->has('equipe'))
             <li class="sidebar-item">
               <a class="sidebar-link" href="{{route('indexEquipe')}}" aria-expanded="false">

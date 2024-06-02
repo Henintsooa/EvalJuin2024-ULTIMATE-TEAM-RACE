@@ -1,61 +1,10 @@
 @extends('parent')
 @section('main')
       <!--  Header End -->
-      <div class="container-fluid">
-        <h3>Bienvenue {{ Auth::user()->name }}</h3>
-        <br>
+      <div class="container-fluid"> 
+        
         <!--  Row 1 -->
-        <div class="row">
-          <div class="col-lg-12 d-flex align-items-stretch">
-            <div class="card w-100"> 
-              <div class="card-body p-4">
-                <h5 class="card-title fw-semibold mb-4">Liste des étapes</h5>
-                <div class="table-responsive">
-              <table class="table text-nowrap mb-0 align-middle">
-                <thead class="text-dark fs-4">
-                  <tr>
-                    <th class="border-bottom-0">
-                      <h6 class="fw-semibold mb-0">Rang</h6>
-                    </th>
-                    <th class="border-bottom-0">
-                      <h6 class="fw-semibold mb-0">Etape</h6>
-                    </th>
-                    <th class="border-bottom-0">
-                      <h6 class="fw-semibold mb-0">Longueur</h6>
-                    </th>
-                    <th class="border-bottom-0">
-                      <h6 class="fw-semibold mb-0">Nbr de coureur</h6>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @foreach ($etapes as $etape)
-                  <tr>
-                      <td class="border-bottom-0">
-                        <p class="mb-0 fw-normal">Etape {{ $etape->rang }}</p>
-                      </td>
-                      <td class="border-bottom-0">
-                        <p class="mb-0 fw-normal"> {{ $etape->nometape }}</p>
-                      </td>
-                      <td class="border-bottom-0">
-                          <p class="mb-0 fw-normal"> {{ $etape->longueur }} km</p>
-                      </td>
-                      <td class="border-bottom-0">
-                          <p class="mb-0 fw-normal">{{ $etape->nbcoureur  }}</p>
-                      </td>
-
-                      <td class="border-bottom-0">
-                        <a href="{{route('affecterTemps', ['idEtape' => $etape->idetape]) }}" class="btn btn-primary btn-sm">Affecter temps coureur</a>
-                      </td>
-                  </tr>
-                  @endforeach
-                </tbody>
-              </table>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div>
+        
           <div class="row">
             <div class="col-lg-8 d-flex align-items-stretch">
               @if(session()->has('success'))
@@ -77,39 +26,44 @@
             <div class="col-lg-8 d-flex align-items-stretch">
               <div class="card w-100">
                   <div class="card-body p-6">
-                      <h5 class="card-title fw-semibold mb-4">Insert étape</h5>
-                      <div class="table-responsive">
-                          <form method="POST" action="/insertEtape">
+                      <h5 class="card-title fw-semibold mb-4">Insert coureur</h5>
+                        <div class="table-responsive">
+                          <form method="POST" action="/insertCoureur">
                               @csrf
                                 <div class="mb-3">
-                                  <label for="nomEtape" class="form-label">Nom Etape</label>
-                                  <input type="text" class="form-control" name="nomEtape" id="">
+                                  <label for="nomCoureur" class="form-label">Nom </label>
+                                  <input type="text" class="form-control" name="nomCoureur" id="">
                                 </div> 
                                 <div class="mb-3">
-                                  <label for="rang" class="form-label">Rang</label>
-                                  <input type="number" class="form-control" name="rang" id="">
+                                  <label for="numero" class="form-label">Numero dossard</label>
+                                  <input type="number" class="form-control" name="numero" id="">
                                 </div> 
                                 <div class="mb-3">
-                                  <label for="longueur" class="form-label">Longueur en km</label>
-                                  <input type="number" step="0.01" class="form-control" name="longueur" id="">
-                                </div>                   
+                                  <label for="genre" class="form-label">Genre</label>
+                                  <select class="form-select" name="genre" id="genre">
+                                    <option value="M">Masculin</option>
+                                    <option value="F">Feminin</option>
+                                  </select>
+                                </div>
+                                <select class="form-select" name="idequipe" id="idequipe">
+                                  <option value="">Selectionner une equipe</option>
+                                  @foreach ($equipes as $equipe)
+                                  <option value="{{ $equipe->idequipe }}" {{ old('idequipe') == $equipe->idequipe ? 'selected' : '' }}>{{ $equipe->nomequipe }}</option>
+                                  @endforeach
+                                </select>                   
                                 <div class="mb-3">
-                                  <label for="nbCoureur" class="form-label">Nombre de coureur</label>
-                                  <input type="number"class="form-control"  name="nbCoureur" id="">
-                                </div>    
+                                  <label for="dateNaissance" class="form-label">Date de naissance</label>
+                                  <input type="date" class="form-control"  name="dateNaissance" id="">
+                                </div>
+
                               <button type="submit" id="submitBtn" class="btn btn-primary">Valider</button>
                           </form>
-      
-                      </div>
+                        </div>
                   </div>
               </div>
             </div>
           </div>
-          <form method="POST" action="{{ url('/reset-database') }}">
-            @csrf
-            <button type="submit" class="btn btn-danger ">Réinitialiser la base de données</button>
-          </form>
-        </div>
+      </div>
         {{-- <div class="col-lg-8 d-flex align-items-stretch">
           @if(session()->has('success'))
           <div class="alert alert-success" role="alert">

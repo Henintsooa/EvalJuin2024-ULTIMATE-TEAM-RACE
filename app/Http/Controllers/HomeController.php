@@ -93,9 +93,10 @@ class HomeController extends Controller
     }
     public function indexEquipe()
     {
+        $nomequipe = session('equipe')['nomequipe'];
         $equipecoureurs=DB::table('viewetapecoureur')->where('idequipe',session('equipe')['idequipe'])->orderBy('rang', 'asc')->get();
         $etapes = DB::table('etape')->orderBy('rang', 'asc')->get();
-        return view('html.index',['etapes'=>$etapes,'equipecoureurs'=>$equipecoureurs]);   
+        return view('html.index',['etapes'=>$etapes,'equipecoureurs'=>$equipecoureurs,'nomequipe'=>$nomequipe]);   
     }
 
     public function classement()

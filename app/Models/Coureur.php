@@ -9,7 +9,7 @@ class Coureur extends Model
 {
     use HasFactory;
     protected $table = 'coureur';
-    protected $primaryKey = 'idCoureur';
+    protected $primaryKey = 'idcoureur';
     protected $fillable = ['nomCoureur','numero','genre','datenaissance','idequipe'];
 
 
