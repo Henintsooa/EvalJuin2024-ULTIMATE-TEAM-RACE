@@ -36,15 +36,8 @@
                             </select>
                         </div>                    
                         <div class="mb-3">
-                            <label for="heureDepart" class="form-label">Heure Depart</label>
-                            <input type="time" step="1" class="form-control" name="heureDepart" value="{{ old('heureDepart') }}">
-                            @error('heureDepart')
-                            <div class="text-danger">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="mb-3">
                             <label for="heureArrivee" class="form-label">Heure Arrivée</label>
-                            <input type="time" step="1" class="form-control" name="heureArrivee" value="{{ old('heureArrivee') }}">
+                            <input type="datetime-local"  step="1" class="form-control" name="heureArrivee" value="{{ old('heureArrivee') }}">
                             @error('heureArrivee')
                             <div class="text-danger">{{ $message }}</div>
                             @enderror

@@ -43,14 +43,37 @@
               </a>
             </li>
             <li class="sidebar-item">
+              <a class="sidebar-link" href="{{route('importDonnee')}}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-layout-dashboard"></i>
+                </span>
+                <span class="hide-menu">Import données</span>
+              </a>
+            </li>
+            {{-- <li class="sidebar-item">
               <a class="sidebar-link" href="{{route('coureur')}}" aria-expanded="false">
                 <span>
                   <i class="ti ti-layout-dashboard"></i>
                 </span>
                 <span class="hide-menu">Coureur</span>
               </a>
+            </li> --}}
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{{route('genererCategorie')}}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-layout-dashboard"></i>
+                </span>
+                <span class="hide-menu">Générer categorie</span>
+              </a>
             </li>
-
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{{route('penalite')}}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-layout-dashboard"></i>
+                </span>
+                <span class="hide-menu">Pénalités</span>
+              </a>
+            </li>
             @elseif(session()->has('equipe'))
             <li class="sidebar-item">
               <a class="sidebar-link" href="{{route('indexEquipe')}}" aria-expanded="false">

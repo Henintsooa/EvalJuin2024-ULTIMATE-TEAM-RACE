@@ -11,6 +11,7 @@ use Illuminate\View\View;
 use App\Models\Equipe;
 use App\Models\Etape;
 use App\Models\Coureur;
+use App\Models\Categorie;
 
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
@@ -38,7 +39,7 @@ class AdminController extends Controller
         $idEtape = $_GET['idEtape'];       
         
         $idequipe = session('equipe')['idequipe'];
-        $coureurs = DB::table('viewetapecoureur')->where('idetape', $idEtape)->get();
+        $coureurs = DB::table('detailsetapecoureur')->where('idetape', $idEtape)->get();
         return view('html.affecterTemps', ['coureurs' => $coureurs, 'idEtape' => $idEtape]);
     }
 
@@ -51,47 +52,24 @@ class AdminController extends Controller
         $validator = Validator::make($request->all(), [
             'idCoureur' => 'required|exists:coureur,idcoureur',
             'idEtape' => 'required|exists:etape,idetape',
-            'heureDepart' => 'required|date_format:H:i:s',
-            'heureArrivee' => 'required|date_format:H:i:s',
-            'lendemain' => 'nullable|boolean'
+            'heureArrivee' => 'required|date_format:Y-m-d\TH:i:s',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        // Calculate the duration between heureDepart and heureArrivee
-        $heureDepart = new \DateTime($request->input('heureDepart'));
+        $heureDebut = DB::table('etape')->where('idetape', $request->input('idEtape'))->value('heuredebut');
+        $heureDebut = new \DateTime($heureDebut);
         $heureArrivee = new \DateTime($request->input('heureArrivee'));
 
-        if ($heureArrivee < $heureDepart) {
-            // Calculate duration from heureDepart to midnight
-            $midnight = (clone $heureDepart)->setTime(23, 59, 59);
-            $intervalToMidnight = $heureDepart->diff($midnight);
-
-            // Calculate duration from midnight to heureArrivee
-            $midnightStart = (clone $heureArrivee)->setTime(0, 0, 0);
-            $intervalFromMidnight = $midnightStart->diff($heureArrivee);
-
-            // Combine the intervals
-            $totalSeconds = ($intervalToMidnight->h * 3600 + $intervalToMidnight->i * 60 + $intervalToMidnight->s + 1) +
-                            ($intervalFromMidnight->h * 3600 + $intervalFromMidnight->i * 60 + $intervalFromMidnight->s);
-
-            $hours = floor($totalSeconds / 3600);
-            $minutes = floor(($totalSeconds % 3600) / 60);
-            $seconds = $totalSeconds % 60;
-
-            $duree = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
-        } else {
-            $interval = $heureDepart->diff($heureArrivee);
-            $duree = $interval->format('%H:%I:%S');
-        }
+        $duree = $heureArrivee->diff($heureDebut)->format('%H:%I:%S');
 
         DB::table('resultatcoureur')->insert([
             'idcoureur' => $request->input('idCoureur'),
             'idetape' => $request->input('idEtape'),
-            'heuredebut' => $request->input('heureDepart'),
-            'heurefin' => $request->input('heureArrivee'),
+            'heuredebut' => $heureDebut->format('Y-m-d H:i:s'),
+            'heurefin' => $heureArrivee->format('Y-m-d H:i:s'),
             'duree' => $duree,
         ]);
 
@@ -175,6 +153,107 @@ class AdminController extends Controller
         }
 
         
+        return redirect()->back();
+    }
+    public function genererCategorie()
+    {
+        return view('html.genererCategorie');
+    }
+
+    public function genereCategorie()
+    {
+        // Récupérer tous les coureurs
+        $coureurs = DB::table('coureur')->get();
+
+        $now = new \DateTime();
+        $adultAge = 18;
+
+        foreach ($coureurs as $coureur) {
+            $birthdate = new \DateTime($coureur->datenaissance);
+            $age = $now->diff($birthdate)->y;
+
+            $categoriesToInsert = [];
+
+            if ($coureur->genre == 'M') {
+                $categoriesToInsert[] = ['nomcategorie' => 'Homme'];
+            } else if ($coureur->genre == 'F') {
+                $categoriesToInsert[] = ['nomcategorie' => 'Femme'];
+            }
+
+            if ($age < $adultAge) {
+                $categoriesToInsert[] = ['nomcategorie' => 'Junior'];
+            }
+
+            // Insérer les nouvelles catégories dans la table 'categorie'
+            foreach ($categoriesToInsert as $category) {
+                DB::table('categorie')->updateOrInsert($category);
+            }
+
+            // Insérer les relations dans la table 'categoriecoureur'
+            foreach ($categoriesToInsert as $category) {
+                // Récupérer l'id de la catégorie
+                $categoryId = DB::table('categorie')->where('nomcategorie', $category['nomcategorie'])->value('idcategorie');
+
+                // Vérifier si la relation existe déjà
+                $existingRelation = DB::table('categoriecoureur')
+                    ->where('idcoureur', $coureur->idcoureur)
+                    ->where('idcategorie', $categoryId)
+                    ->exists();
+
+                // Si la relation n'existe pas, l'insérer
+                if (!$existingRelation) {
+                    DB::table('categoriecoureur')->insert([
+                        'idcoureur' => $coureur->idcoureur,
+                        'idcategorie' => $categoryId
+                    ]);
+                }
+            }
+        }
+
+        return view('html.genererCategorie');
+    }
+
+    public function penalite()
+    {
+        $etapes = DB::table('etape')->get();
+        $equipes = DB::table('equipe')->get();
+
+        return view('html.penalite',['etapes'=>$etapes,'equipes' => $equipes]);
+    }
+
+    public function insertPenalite(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'idetape' => 'required|integer',
+            'idequipe' => 'required|integer',
+            'tempsPenalite' => 'required|date_format:H:i:s',
+            
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+        
+        DB::table('penalite')->insert([
+            'idetape' => $request->input('idetape'),
+            'idequipe' => $request->input('idequipe'),
+            'tempspenalite' => $request->input('tempsPenalite'),
+        ]);
+
+        $coureurs = DB::table('Coureur')
+        ->where('idEquipe', $request->input('idequipe'))
+        ->get();
+
+        // Pour chaque coureur, ajouter une nouvelle ligne dans ResultatCoureur avec la pénalité
+        foreach ($coureurs as $coureur) {
+        DB::table('ResultatCoureur')->insert([
+        'idCoureur' => $coureur->idCoureur,
+        'idEtape' => $request->input('idetape'),
+        'heureDebut' => null,
+        'heureFin' => null,
+        'duree' => $request->input('tempsPenalite')
+        ]);
+        }   
         return redirect()->back();
     }
 }

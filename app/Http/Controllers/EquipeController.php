@@ -67,9 +67,9 @@ class EquipeController extends Controller
         JOIN coureur ON etapecoureur.idcoureur = coureur.idcoureur
         WHERE etapecoureur.idetape = :idEtape
         AND coureur.idequipe = :idEquipe
-    ", ['idEtape' => $idEtape, 'idEquipe' => $idEquipe]);
+        ", ['idEtape' => $idEtape, 'idEquipe' => $idEquipe]);
 
-    $currentCount = $currentCount[0]->count;
+        $currentCount = $currentCount[0]->count;
 
         // Vérifier si l'ajout des nouveaux coureurs dépasse la limite
         if ($currentCount + count($idCoureurs) > $maxCoureurs) {

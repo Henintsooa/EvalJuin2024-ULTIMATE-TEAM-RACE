@@ -14,6 +14,8 @@ use App\Models\ViewClassementGeneraleCoureur;
 use App\Models\ViewClassementGenerale;
 use App\Models\ViewPointsCoureurEtape;
 use App\Models\ViewEtapeCoureur;
+use App\Models\ViewClassementEquipeCategorie;
+use App\Models\ViewClassementGeneralEquipe;
 
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
@@ -94,9 +96,15 @@ class HomeController extends Controller
     public function indexEquipe()
     {
         $nomequipe = session('equipe')['nomequipe'];
-        $equipecoureurs=DB::table('viewetapecoureur')->where('idequipe',session('equipe')['idequipe'])->orderBy('rang', 'asc')->get();
         $etapes = DB::table('etape')->orderBy('rang', 'asc')->get();
-        return view('html.index',['etapes'=>$etapes,'equipecoureurs'=>$equipecoureurs,'nomequipe'=>$nomequipe]);   
+        $equipecoureurs=DB::table('viewetapecoureur')->where('idequipe',session('equipe')['idequipe'])->orderBy('rang', 'asc')->get();
+        $chronocoureurs=DB::table('viewresultatcoureur')->where('idequipe',session('equipe')['idequipe'])->get();
+        // Organiser les chronos par étape
+        $chronosParEtape = [];
+        foreach ($chronocoureurs as $chronocoureur) {
+            $chronosParEtape[$chronocoureur->idetape][] = $chronocoureur;
+        }
+        return view('html.index',['etapes'=>$etapes,'equipecoureurs'=>$equipecoureurs,'nomequipe'=>$nomequipe,'chronosParEtape'=>$chronosParEtape]);   
     }
 
     public function classement()
@@ -104,10 +112,11 @@ class HomeController extends Controller
         if (!Auth::check() && !$idequipe = session('equipe')['idequipe']) {
             return redirect()->route('login')->with('error', 'Veuillez vous connecter en tant qu\'administrateur ou comme un client pour accéder à cette page.');
         }
+        $classementGeneraleEquipes = ViewClassementGeneralEquipe::all();
         $classementGeneraleCoureurs = ViewClassementGeneraleCoureur::all();
-        $classementGeneraleEtapes = ViewPointsCoureurEtape::all();
+        $classementGeneraleEtapes = DB::table('viewpointscoureuretape')->orderBy('rangetape')->orderBy('classement')->get();
         $classementParEtape = $classementGeneraleEtapes->groupBy('rangetape');
-        return view('html.classement', ['classementGeneraleCoureurs' => $classementGeneraleCoureurs,'classementParEtape' => $classementParEtape]);
+        return view('html.classement', ['classementGeneraleCoureurs' => $classementGeneraleCoureurs,'classementGeneraleEquipes' => $classementGeneraleEquipes,'classementGeneraleEtapes' => $classementGeneraleEtapes]);
     }
     public function classementEquipe()
     {
@@ -115,22 +124,27 @@ class HomeController extends Controller
             return redirect()->route('login')->with('error', 'Veuillez vous connecter en tant qu\'administrateur ou comme un client pour accéder à cette page.');
         }
         $classementGenerales = ViewClassementGenerale::all();
-        return view('html.classementEquipe', ['classementGenerales' => $classementGenerales]);
+        $classementGeneraleCategories = ViewClassementEquipeCategorie::all()->groupBy('nomcategorie');
+        return view('html.classementEquipe', ['classementGenerales' => $classementGenerales,'classementGeneraleCategories' => $classementGeneraleCategories]);
     }
     public function reset()
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        // Désactiver temporairement les triggers (qui incluent les vérifications de clé étrangère) pour PostgreSQL
+        $tables = DB::select('SELECT tablename FROM pg_tables WHERE schemaname = ?', ['public']);
 
-        $tables = DB::select('SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = ? AND table_type = "BASE TABLE"', [env('DB_DATABASE')]);
         foreach ($tables as $table) {
-            if ($table->TABLE_NAME == 'users') {
+            if ($table->tablename == 'users') {
                 continue;
             }
-            DB::table($table->TABLE_NAME)->truncate();
-        }
 
-        DB::statement('SET FOREIGN_KEY_CHECKS=1');
+            // Désactiver les triggers (contraintes) avant de tronquer la table
+            DB::statement('ALTER TABLE ' . $table->tablename . ' DISABLE TRIGGER ALL');
+            DB::table($table->tablename)->truncate();
+            // Réactiver les triggers (contraintes) après avoir tronqué la table
+            DB::statement('ALTER TABLE ' . $table->tablename . ' ENABLE TRIGGER ALL');
+        }
 
         return redirect()->back()->with('success', 'La base de données a été réinitialisée avec succès.');
     }
+
 }
