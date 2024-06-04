@@ -217,8 +217,8 @@ class AdminController extends Controller
     {
         $etapes = DB::table('etape')->get();
         $equipes = DB::table('equipe')->get();
-
-        return view('html.penalite',['etapes'=>$etapes,'equipes' => $equipes]);
+        $penalites = DB::table('detailspenalite')->get();
+        return view('html.penalite',['etapes'=>$etapes,'equipes' => $equipes,'penalites'=>$penalites]);
     }
 
     public function insertPenalite(Request $request)
@@ -240,20 +240,86 @@ class AdminController extends Controller
             'tempspenalite' => $request->input('tempsPenalite'),
         ]);
 
-        $coureurs = DB::table('Coureur')
-        ->where('idEquipe', $request->input('idequipe'))
-        ->get();
+        $coureurs = DB::select("
+        SELECT coureur.idcoureur 
+        FROM etapecoureur
+        JOIN coureur ON etapecoureur.idCoureur = coureur.idcoureur
+        WHERE etapecoureur.idetape =?
+        AND coureur.idequipe =?
+        AND EXISTS (
+            SELECT 1 FROM resultatcoureur
+            JOIN coureur on coureur.idcoureur = resultatcoureur.idcoureur
+            WHERE resultatcoureur.idcoureur = coureur.idcoureur
+            AND resultatcoureur.idetape =?
+        )", [
+            $request->input('idetape'),
+            $request->input('idequipe'),
+            $request->input('idetape') 
+        ]);
 
         // Pour chaque coureur, ajouter une nouvelle ligne dans ResultatCoureur avec la pénalité
         foreach ($coureurs as $coureur) {
-        DB::table('ResultatCoureur')->insert([
-        'idCoureur' => $coureur->idCoureur,
-        'idEtape' => $request->input('idetape'),
-        'heureDebut' => null,
-        'heureFin' => null,
+        DB::table('resultatcoureur')->insert([
+        'idcoureur' => $coureur->idcoureur,
+        'idetape' => $request->input('idetape'),
+        'heuredebut' => null,
+        'heurefin' => null,
         'duree' => $request->input('tempsPenalite')
         ]);
         }   
         return redirect()->back();
     }
+    
+    public function supprimerPenalite(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'idpenalite' => 'required|integer',
+            'idetape' => 'required|integer',
+            'idequipe' => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        DB::table('penalite')->where('idpenalite', $request->input('idpenalite'))->delete();
+
+        $coureurs = DB::select("
+        SELECT coureur.idcoureur 
+        FROM etapecoureur
+        JOIN coureur ON etapecoureur.idCoureur = coureur.idcoureur
+        WHERE etapecoureur.idetape =?
+        AND coureur.idequipe =?
+        AND EXISTS (
+            SELECT 1 FROM resultatcoureur
+            JOIN coureur on coureur.idcoureur = resultatcoureur.idcoureur
+            WHERE resultatcoureur.idcoureur = coureur.idcoureur
+            AND resultatcoureur.idetape =?
+        )", [
+            $request->input('idetape'),
+            $request->input('idequipe'),
+            $request->input('idetape') 
+        ]);
+
+        foreach ($coureurs as $coureur) {
+            DB::table('resultatcoureur')
+            ->where('idcoureur', $coureur->idcoureur)
+            ->whereNull('heuredebut')
+            ->whereNull('heurefin')
+            ->delete();
+        }   
+
+        return redirect()->back();
+        
+    }
+    
+    public function showCertificat()
+    {
+        $idequipe = $_GET['idequipe'];       
+
+        $classementGenerale = DB::table('viewclassementgeneral')->where('idequipe', $idequipe)->get();
+
+        return view('html.pdfCertificat',['classementGenerale'=>$classementGenerale]);
+    }
+
 }

@@ -226,6 +226,7 @@ SELECT
     v.dureeEtape,
     v.classement,
     v.idcoureur,
+    e.idequipe,
     e.nomEquipe,
     COALESCE(SUM(p.points), 0) AS points
 FROM
@@ -243,6 +244,7 @@ GROUP BY
     v.dureeEtape,
     v.classement,
     v.idcoureur,
+    e.idequipe,
     e.nomEquipe
 ORDER BY v.idEtape, v.classement ASC; 
 
@@ -304,13 +306,13 @@ ORDER BY
 
 CREATE OR REPLACE VIEW ViewClassementGeneral AS
 SELECT
-    v.nomEquipe,
+    v.idequipe,v.nomEquipe,
     DENSE_RANK() OVER (ORDER BY SUM(points) DESC) AS classementGeneral,
     SUM(points) AS totalPoints
 FROM
     ViewPointsCoureurEtape v
 GROUP BY
-    v.nomEquipe;
+    v.idequipe,v.nomEquipe;
 
 --------------------------- Classement generale coureur
 CREATE OR REPLACE VIEW ViewClassementGeneralCoureur AS
@@ -361,19 +363,28 @@ group by  e.idetape,e.rang,e.nomEtape,e.longueur,eq.idEquipe,eq.nomEquipe,nbcour
 
 --------------------------- Details coureur chrono
 CREATE OR REPLACE  View viewresultatcoureur as 
-select c.nomcoureur,rc.duree 
+select c.idcoureur,c.nomcoureur,sum(rc.duree) as duree,e.idetape,eq.idequipe 
 from resultatcoureur rc 
 LEFT JOIN coureur c ON rc.idcoureur = c.idcoureur
 JOIN equipe eq ON eq.idequipe = c.idequipe
 JOIN etape e on e.idetape = rc.idetape
+group by c.idcoureur,c.nomcoureur,e.idetape,eq.idequipe 
 
 
 CREATE OR REPLACE  View viewresultatcoureur as 
-select c.nomcoureur,rc.duree 
-from resultatcoureur rc 
-LEFT JOIN coureur c ON rc.idcoureur = c.idcoureur
-JOIN equipe eq ON eq.idequipe = c.idequipe
-JOIN etape e on e.idetape = rc.idetape
+select    
+    e.rang,
+    e.nometape,
+    e.longueur,
+    eq.idequipe,
+    eq.nomequipe,
+    count(c.idcoureur) AS nbcoureur
+   from resultatcoureur rc 
+    LEFT JOIN coureur c ON rc.idcoureur = c.idcoureur
+    JOIN equipe eq ON eq.idequipe = c.idequipe
+    JOIN etape e on e.idetape = rc.idetape
+  GROUP BY e.rang, e.nometape, e.longueur, eq.idequipe, eq.nomequipe, e.nbcoureur;
+
 
 --------------------------------Classement joueur categorie
 CREATE OR REPLACE VIEW ViewClassementCoureurEtapeCategorie AS
@@ -440,7 +451,11 @@ ORDER BY
     vpec.nomCategorie ASC,
     classement ASC;
 
-
+------------------------------Details pénalités
+create or replace view detailspenalite as
+select p.idetape,p.idequipe,et.nometape,e.nomequipe,p.tempspenalite from penalite p
+join etape et on et.idetape= p.idetape 
+join equipe e on e.idequipe=p.idequipe
 
 -- ROW_NUMBER() OVER(PARTITION BY rc.idEtape ORDER BY SUM(rc.duree) DESC) AS classement
 

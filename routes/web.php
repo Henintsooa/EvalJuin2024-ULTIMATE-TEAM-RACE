@@ -8,6 +8,9 @@ use App\Http\Controllers\ImportController;
 use Illuminate\Support\Facades\Route;
 
 
+Route::get('/showCertificat', [AdminController::class, 'showCertificat'])->name('showCertificat');
+
+Route::post('/supprimerPenalite', [AdminController::class, 'supprimerPenalite'])->name('supprimerPenalite'); 
 Route::post('/insertPenalite', [AdminController::class, 'insertPenalite'])->name('insertPenalite'); 
 Route::get('/penalite', [AdminController::class, 'penalite'])->name('penalite'); 
 

@@ -14,16 +14,16 @@
               <table class="table text-nowrap mb-0 align-middle">
                 <thead class="text-dark fs-4">
                   <tr>
-                    <th class="border-bottom-0">
+                    <th class="">
                       <h6 class="fw-semibold mb-0">Rang</h6>
                     </th>
-                    <th class="border-bottom-0">
+                    <th class="">
                       <h6 class="fw-semibold mb-0">Etape</h6>
                     </th>
-                    <th class="border-bottom-0">
+                    <th class="">
                       <h6 class="fw-semibold mb-0">Longueur</h6>
                     </th>
-                    <th class="border-bottom-0">
+                    <th class="">
                       <h6 class="fw-semibold mb-0">Nbr de coureur</h6>
                     </th>
                   </tr>
@@ -31,20 +31,20 @@
                 <tbody>
                   @foreach ($etapes as $etape)
                   <tr>
-                      <td class="border-bottom-0">
+                      <td class="">
                         <p class="mb-0 fw-normal">Etape {{ $etape->rang }}</p>
                       </td>
-                      <td class="border-bottom-0">
+                      <td class="">
                         <p class="mb-0 fw-normal"> {{ $etape->nometape }}</p>
                       </td>
-                      <td class="border-bottom-0">
+                      <td class="">
                           <p class="mb-0 fw-normal"> {{ $etape->longueur }} km</p>
                       </td>
-                      <td class="border-bottom-0">
+                      <td class="">
                           <p class="mb-0 fw-normal">{{ $etape->nbcoureur  }}</p>
                       </td>
 
-                      <td class="border-bottom-0">
+                      <td class="">
                         <a href="{{route('affecterTemps', ['idEtape' => $etape->idetape]) }}" class="btn btn-primary btn-sm">Affecter temps coureur</a>
                       </td>
                   </tr>

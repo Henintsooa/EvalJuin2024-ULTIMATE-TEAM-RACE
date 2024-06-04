@@ -9,7 +9,7 @@ class ViewClassementGenerale extends Model
 {
     use HasFactory;
     protected $table = 'viewclassementgeneral';
-    protected $fillable = ['nomequipe','classementgeneral','totalpoints'];
+    protected $fillable = ['idequipe','nomequipe','classementgeneral','totalpoints'];
 
 
 }

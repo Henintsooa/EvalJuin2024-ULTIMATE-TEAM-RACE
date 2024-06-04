@@ -123,9 +123,15 @@ class HomeController extends Controller
         if (!Auth::check() && !$idequipe = session('equipe')['idequipe']) {
             return redirect()->route('login')->with('error', 'Veuillez vous connecter en tant qu\'administrateur ou comme un client pour accéder à cette page.');
         }
+        $categorie= DB::table('categorie')->first();
+        if (request()->input('nomcategorie')) {
+            $classementGeneraleCategories = DB::table('viewclassementequipecategorie')->where('nomcategorie',request()->input('nomcategorie'))->get();
+        }else{
+            $classementGeneraleCategories = DB::table('viewclassementequipecategorie')->where('nomcategorie',$categorie->nomcategorie)->get();
+        }
         $classementGenerales = ViewClassementGenerale::all();
-        $classementGeneraleCategories = ViewClassementEquipeCategorie::all()->groupBy('nomcategorie');
-        return view('html.classementEquipe', ['classementGenerales' => $classementGenerales,'classementGeneraleCategories' => $classementGeneraleCategories]);
+        $categories = DB::table('categorie')->get();
+        return view('html.classementEquipe', ['classementGenerales' => $classementGenerales,'classementGeneraleCategories' => $classementGeneraleCategories,'categories' => $categories]);
     }
     public function reset()
     {

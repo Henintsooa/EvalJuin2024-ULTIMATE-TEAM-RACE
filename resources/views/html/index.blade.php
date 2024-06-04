@@ -23,16 +23,16 @@
               <table class="table text-nowrap mb-0 align-middle">
                 <thead class="text-dark fs-4">
                   <tr>
-                    <th class="border-bottom-0">
+                    <th class="">
                       <h6 class="fw-semibold mb-0">Rang</h6>
                     </th>
-                    <th class="border-bottom-0">
+                    <th class="">
                       <h6 class="fw-semibold mb-0">Etape</h6>
                     </th>
-                    <th class="border-bottom-0">
+                    <th class="">
                       <h6 class="fw-semibold mb-0">Longueur</h6>
                     </th>
-                    <th class="border-bottom-0">
+                    <th class="">
                       <h6 class="fw-semibold mb-0">Nbr de coureur</h6>
                     </th>
                   </tr>
@@ -40,20 +40,20 @@
                 <tbody>
                   @foreach ($etapes as $etape)
                   <tr>
-                      <td class="border-bottom-0">
+                      <td class="">
                         <p class="mb-0 fw-normal">Etape {{ $etape->rang }}</p>
                       </td>
-                      <td class="border-bottom-0">
+                      <td class="">
                         <p class="mb-0 fw-normal"> {{ $etape->nometape }}</p>
                       </td>
-                      <td class="border-bottom-0">
+                      <td class="">
                           <p class="mb-0 fw-normal"> {{ $etape->longueur }} km</p>
                       </td>
-                      <td class="border-bottom-0">
+                      <td class="">
                           <p class="mb-0 fw-normal">{{ $etape->nbcoureur  }}</p>
                       </td>
                 
-                      <td class="border-bottom-0">
+                      <td class="">
                         <a href="{{route('affecterCoureur', ['idEtape' => $etape->idetape,'nbrCoureur' => $etape->nbcoureur]) }}" class="btn btn-primary btn-sm">Affecter coureur</a>
                       </td>
                   </tr>
@@ -75,7 +75,7 @@
                               <tbody>
                                   @foreach ($equipecoureurs as $equipecoureur)
                                       <tr>
-                                          <td class="border-bottom-0">
+                                          <td class="">
                                               <p class="mb-0 fw-semibold">{{ $equipecoureur->nometape }} ({{ $equipecoureur->longueur }}km) - {{ $equipecoureur->nbcoureur }} coureur</p>                                              
                                           </td>
                             
@@ -107,7 +107,7 @@
                     
                                                           @endforeach
                                                           <tr>
-                                                            <td class="border-bottom-0">
+                                                            <td class="">
                                                               <a href="{{route('affecterCoureur', ['idEtape' => $chronocoureur->idetape,'nbrCoureur' => $equipecoureur->nbcoureur]) }}" class="btn btn-primary btn-sm">Affecter coureur</a>
                                                             </td>
                                                         </tr>
