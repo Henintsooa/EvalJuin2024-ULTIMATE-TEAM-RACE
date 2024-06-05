@@ -67,7 +67,6 @@
                             <i class="ti ti-minus fs-4"></i>
                           </a>
                         </td>
-                        
                     </tr>
                     @endforeach
                   </tbody>
@@ -106,7 +105,7 @@
                                   <select class="form-select" name="idetape" id="idetape">
                                     <option value="">Selectionner une étape</option>
                                     @foreach ($etapes as $etape)
-                                    <option value="{{ $etape->idetape }}" {{ old('idetape') == $etape->idetape ? 'selected' : '' }}>{{ $etape->nometape }}</option>
+                                    <option value="{{ $etape->idetape }}" {{ old('idetape') == $etape->idetape ? 'selected' : '' }}>{{ $etape->rang }}-{{ $etape->nometape }}</option>
                                     @endforeach
                                   </select>
                                 </div>

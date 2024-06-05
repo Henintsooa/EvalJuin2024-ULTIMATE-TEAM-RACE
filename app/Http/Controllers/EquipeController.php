@@ -31,7 +31,7 @@ class EquipeController extends Controller
     public function affectationCoureur(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'idCoureurs' => 'required|array|min:1', // Assurez-vous qu'il y a au moins deux coureurs
+            'idCoureurs' => 'required', 
             'idEtape' => 'required',
         ]);
 
@@ -42,12 +42,7 @@ class EquipeController extends Controller
         $idCoureurs = $request->input('idCoureurs');
         $idEtape = $request->input('idEtape');
 
-        // Vérifier les doublons dans idCoureurs
-        if (count($idCoureurs) !== count(array_unique($idCoureurs))) {
-            return redirect()->back()->withErrors([
-                'idCoureurs' => 'Les coureurs doivent être differents.'
-            ])->withInput();
-        }
+        
 
         // Filtrer les valeurs nulles
         $idCoureurs = array_filter($idCoureurs, function($idCoureur) {
@@ -77,7 +72,22 @@ class EquipeController extends Controller
                 'idCoureurs' => 'Le nombre total de coureurs pour cette étape dépasse la limite autorisée.'
             ])->withInput();
         }
-        
+        // pour avoir les doublons
+        $existingCoureurs = DB::table('etapecoureur')
+        ->join('coureur', 'etapecoureur.idcoureur', '=', 'coureur.idcoureur')
+        ->where('etapecoureur.idetape', $idEtape)
+        ->whereIn('etapecoureur.idcoureur', $idCoureurs)
+        ->where('coureur.idequipe', $idEquipe)
+        ->pluck('etapecoureur.idcoureur')
+        ->toArray();
+//pluck('etapecoureur.idcoureur') :
+
+// Récupère les valeurs de la colonne idcoureur des lignes filtrées.
+        if (!empty($existingCoureurs)) {
+            return redirect()->back()->withErrors([
+                'idCoureurs' => 'Ce coureur est déjà affecté à cette étape pour cette équipe.'
+            ])->withInput();
+        }
         foreach ($idCoureurs as $idCoureur) {
             DB::table('etapecoureur')->insert([
                 'idetape' => $idEtape,

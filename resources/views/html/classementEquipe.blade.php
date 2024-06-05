@@ -35,9 +35,6 @@
                           <td class="">
                           <p class="mb-0 fw-normal"> {{ $classementGenerale->totalpoints }} </p>
                           </td>
-                          <td class="">
-                          <p class="mb-0 fw-normal"> {{ $classementGenerale->totalpoints }} </p>
-                          </td>
                           @if(Auth::user()->status ?? '' == 'admin')
                           @if($loop->first)
                           <td class="">

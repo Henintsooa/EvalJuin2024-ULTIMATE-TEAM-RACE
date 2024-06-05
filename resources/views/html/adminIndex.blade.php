@@ -74,7 +74,7 @@
               </div>
               @endif
             </div>
-            <div class="col-lg-8 d-flex align-items-stretch">
+            {{-- <div class="col-lg-8 d-flex align-items-stretch">
               <div class="card w-100">
                   <div class="card-body p-6">
                       <h5 class="card-title fw-semibold mb-4">Insert étape</h5>
@@ -103,7 +103,7 @@
                       </div>
                   </div>
               </div>
-            </div>
+            </div> --}}
           </div>
           <form method="POST" action="{{ url('/reset-database') }}">
             @csrf

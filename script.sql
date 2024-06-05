@@ -354,10 +354,10 @@ JOIN equipe eq ON eq.idequipe = c.idequipe;
 
 --ou update
 CREATE OR REPLACE  View viewetapecoureur as 
-SELECT e.idetape,e.rang,e.nomEtape,e.longueur,eq.idEquipe,eq.nomEquipe,count(c.idcoureur) as nbcoureur
+SELECT e.idetape,e.rang,e.nomEtape,e.longueur,eq.idEquipe,eq.nomEquipe,count(c.idcoureur) as nbcoureurEquipe,e.nbcoureur
 FROM etape e
 JOIN etapecoureur ec ON ec.idetape = e.idetape
-JOIN coureur c ON ec.idcoureur = c.idcoureur
+LEFT JOIN coureur c ON ec.idcoureur = c.idcoureur
 JOIN equipe eq ON eq.idequipe = c.idequipe
 group by  e.idetape,e.rang,e.nomEtape,e.longueur,eq.idEquipe,eq.nomEquipe,nbcoureur
 
@@ -385,6 +385,37 @@ select
     JOIN etape e on e.idetape = rc.idetape
   GROUP BY e.rang, e.nometape, e.longueur, eq.idequipe, eq.nomequipe, e.nbcoureur;
 
+CREATE OR REPLACE VIEW viewresultatcoureur AS
+WITH EtapeCoureurs AS (
+    SELECT 
+        et.idetape,
+        c.idcoureur,
+        c.nomcoureur,
+        eq.idequipe
+    FROM 
+        etapecoureur et
+    JOIN 
+        coureur c ON et.idcoureur = c.idcoureur
+    JOIN 
+        equipe eq ON c.idequipe = eq.idequipe
+    JOIN 
+        etape e ON et.idetape = e.idetape
+)
+SELECT 
+    ec.idcoureur,
+    ec.nomcoureur,
+    COALESCE(SUM(rc.duree), '00:00:00') AS duree,
+    ec.idetape,
+    ec.idequipe
+FROM 
+    EtapeCoureurs ec
+LEFT JOIN 
+    resultatcoureur rc ON rc.idcoureur = ec.idcoureur AND rc.idetape = ec.idetape
+GROUP BY 
+    ec.idcoureur,
+    ec.nomcoureur,
+    ec.idetape,
+    ec.idequipe;
 
 --------------------------------Classement joueur categorie
 CREATE OR REPLACE VIEW ViewClassementCoureurEtapeCategorie AS
@@ -463,6 +494,85 @@ select etape.*,coureur.nomCoureur
 from etape
 join etapecoureur on etape.idEtape = etapecoureur.idEtape
 join coureur on etapecoureur.idCoureur = coureur.idCoureur
+
+
+--------------------------Details classement coureur par étape
+--------------------(comme ViewClassementCoureurEtape mais sans les durees de penalite) )
+CREATE OR REPLACE VIEW ViewDureeEtapeSansPenalite AS 
+SELECT
+    et.nomEtape,
+    v.idEtape,
+    v.rangEtape,
+    v.nomcoureur,
+    SUM(CASE WHEN rc.heureDebut IS NOT NULL AND rc.heureFin IS NOT NULL THEN (rc.duree || ' minute')::interval END) AS dureeSansPenalite,
+    v.classement,
+    v.idcoureur,
+    e.idequipe,
+    e.nomEquipe,
+    COALESCE(SUM(p.points), 0) AS points
+FROM
+    ViewClassementCoureurEtape v
+JOIN ResultatCoureur rc ON v.idcoureur = rc.idCoureur AND v.idEtape = rc.idEtape
+LEFT JOIN points p ON v.classement = p.rang
+JOIN coureur c ON c.idcoureur = v.idcoureur
+JOIN equipe e ON e.idequipe = c.idequipe
+JOIN etape et ON et.idetape = v.idetape
+GROUP BY
+    et.nomEtape,
+    v.idEtape,
+    v.rangEtape,
+    v.nomcoureur,
+    v.classement,
+    v.idcoureur,
+    e.idequipe,
+    e.nomEquipe
+ORDER BY v.idEtape, v.classement ASC;
+
+
+CREATE OR REPLACE VIEW coureurclassementdetails AS
+SELECT 
+    v.nometape,
+    v.idetape,
+    v.rangetape,
+    v.nomcoureur,
+    v.dureeSansPenalite AS chrono,  -- This is the duration without penalty
+    v.classement,
+    v.idcoureur,
+    v.idequipe,
+    v.nomequipe,
+    v.points,
+    c.genre,
+    COALESCE(p.total_tempspenalite, '00:00:00') AS tempspenalite,
+    (v.dureeSansPenalite::interval + COALESCE(p.total_tempspenalite::interval, '00:00:00'))::time AS heurefin  -- This is the final time with penalty
+FROM 
+    ViewDureeEtapeSansPenalite v
+JOIN 
+    coureur c ON c.idcoureur = v.idcoureur
+LEFT JOIN (
+    SELECT 
+        idequipe, 
+        idetape, 
+        SUM(tempspenalite::time) AS total_tempspenalite
+    FROM 
+        penalite
+    GROUP BY 
+        idequipe, 
+        idetape
+) p ON p.idequipe = v.idequipe AND p.idetape = v.idetape
+GROUP BY 
+    v.nometape,
+    v.idetape,
+    v.rangetape,
+    v.nomcoureur,
+    v.dureeSansPenalite,
+    v.classement,
+    v.idcoureur,
+    v.idequipe,
+    v.nomequipe,
+    v.points,
+    c.genre,
+    p.total_tempspenalite;
+
 
 
 INSERT INTO "public".resultatcoureur(idresultatcoureur, idcoureur, idetape, heuredebut, heurefin, duree)

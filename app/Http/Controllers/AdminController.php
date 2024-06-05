@@ -7,7 +7,7 @@ use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
+// use Illuminate\View\View;
 use App\Models\Equipe;
 use App\Models\Etape;
 use App\Models\Coureur;
@@ -16,6 +16,9 @@ use App\Models\Categorie;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\View;
+use Dompdf\Dompdf;   
+
 
     
 
@@ -182,7 +185,9 @@ class AdminController extends Controller
 
             if ($age < $adultAge) {
                 $categoriesToInsert[] = ['nomcategorie' => 'Junior'];
-            }
+            } else {
+                $categoriesToInsert[] = ['nomcategorie' => 'Senior'];
+            }    
 
             // Insérer les nouvelles catégories dans la table 'categorie'
             foreach ($categoriesToInsert as $category) {
@@ -316,10 +321,54 @@ class AdminController extends Controller
     public function showCertificat()
     {
         $idequipe = $_GET['idequipe'];       
-
+        $coureurs = DB::select('SELECT * FROM coureur c JOIN equipe e ON e.idequipe = c.idequipe WHERE e.idequipe =?', [$idequipe]);
         $classementGenerale = DB::table('viewclassementgeneral')->where('idequipe', $idequipe)->get();
-
-        return view('html.pdfCertificat',['classementGenerale'=>$classementGenerale]);
+        $penalites = DB::table('penalite')->where('idequipe', $idequipe)->get();
+        return view('html.pdfCertificat',['classementGenerale'=>$classementGenerale,'coureurs'=>$coureurs,'penalites'=>$penalites]);
     }
 
+    public function pdfCertificat()
+    {
+        $idequipe = $_GET['idequipe'];       
+        $coureurs = DB::select('SELECT * FROM coureur c JOIN equipe e ON e.idequipe = c.idequipe WHERE e.idequipe =?', [$idequipe]);
+        $classementGenerale = DB::table('viewclassementgeneral')->where('idequipe', $idequipe)->get();
+        
+        $html = View::make('pdf.pdfCertificat')->with(['coureurs'=>$coureurs,'classementGenerale'=>$classementGenerale])->render();
+
+        // Créez un nouvel objet Dompdf
+        $dompdf = new Dompdf();
+
+        // Chargez le contenu HTML dans Dompdf
+        $dompdf->loadHtml($html);
+
+        // Rendez le document PDF
+        $dompdf->render();
+
+        // Générez le nom du fichier PDF
+        $filename = 'certficate.pdf';
+
+        // Téléchargez le fichier PDF
+        return $dompdf->stream($filename);
+    }
+
+    public function classementCoureur()
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Veuillez vous connecter en tant qu\'administrateur pour accéder à cette page.');
+        }
+        $etapes=DB::table('etape')->orderBy('rang','asc')->get();
+        return view('html.classementCoureur', ['etapes' => $etapes]);
+    }
+    
+    public function classementCoureurEtape(Request $request)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Veuillez vous connecter en tant qu\'administrateur pour accéder à cette page.');
+        }
+
+        $idetape = $request->input('idetape');
+        $classementGeneraleEtapes = DB::table('coureurclassementdetails')->where('idetape', $idetape)->orderBy('classement','asc')->get();
+        // dd($classementGeneraleEtapes);
+        return view('html.classementCoureurEtape', ['classementGeneraleEtapes' => $classementGeneraleEtapes]);
+    }
 }

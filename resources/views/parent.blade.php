@@ -37,7 +37,7 @@
             <li class="sidebar-item">
               <a class="sidebar-link" href="{{route('dashboard_admin')}}" aria-expanded="false">
                 <span>
-                  <i class="ti ti-layout-dashboard"></i>
+                  <i class="ti ti-settings"></i>
                 </span>
                 <span class="hide-menu">Etapes</span>
               </a>
@@ -45,7 +45,7 @@
             <li class="sidebar-item">
               <a class="sidebar-link" href="{{route('importDonnee')}}" aria-expanded="false">
                 <span>
-                  <i class="ti ti-layout-dashboard"></i>
+                  <i class="ti ti-upload"></i>
                 </span>
                 <span class="hide-menu">Import données</span>
               </a>
@@ -61,7 +61,7 @@
             <li class="sidebar-item">
               <a class="sidebar-link" href="{{route('genererCategorie')}}" aria-expanded="false">
                 <span>
-                  <i class="ti ti-layout-dashboard"></i>
+                  <i class="ti ti-plus"></i>
                 </span>
                 <span class="hide-menu">Générer categorie</span>
               </a>
@@ -69,16 +69,25 @@
             <li class="sidebar-item">
               <a class="sidebar-link" href="{{route('penalite')}}" aria-expanded="false">
                 <span>
-                  <i class="ti ti-layout-dashboard"></i>
+                  <i class="ti ti-minus"></i>
                 </span>
                 <span class="hide-menu">Pénalités</span>
               </a>
             </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{{route('classementCoureur')}}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-list"></i>
+                </span>
+                <span class="hide-menu">Classement Par Coureur</span>
+              </a>
+            </li>
+
             @elseif(session()->has('equipe'))
             <li class="sidebar-item">
               <a class="sidebar-link" href="{{route('indexEquipe')}}" aria-expanded="false">
                 <span>
-                  <i class="ti ti-layout-dashboard"></i>
+                  <i class="ti ti-calendar"></i>
                 </span>
                 <span class="hide-menu">Etapes</span>
               </a>
@@ -87,7 +96,7 @@
             <li class="sidebar-item">
               <a class="sidebar-link" href="{{route('classement')}}" aria-expanded="false">
                 <span>
-                  <i class="ti ti-layout-dashboard"></i>
+                  <i class="ti ti-list"></i>
                 </span>
                 <span class="hide-menu">Classement Général</span>
               </a>
@@ -95,7 +104,7 @@
             <li class="sidebar-item">
               <a class="sidebar-link" href="{{route('classementEquipe')}}" aria-expanded="false">
                 <span>
-                  <i class="ti ti-layout-dashboard"></i>
+                  <i class="ti ti-list"></i>
                 </span>
                 <span class="hide-menu">Classement Par Equipe</span>
               </a> 

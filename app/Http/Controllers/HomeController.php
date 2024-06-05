@@ -116,7 +116,10 @@ class HomeController extends Controller
         $classementGeneraleCoureurs = ViewClassementGeneraleCoureur::all();
         $classementGeneraleEtapes = DB::table('viewpointscoureuretape')->orderBy('rangetape')->orderBy('classement')->get();
         $classementParEtape = $classementGeneraleEtapes->groupBy('rangetape');
-        return view('html.classement', ['classementGeneraleCoureurs' => $classementGeneraleCoureurs,'classementGeneraleEquipes' => $classementGeneraleEquipes,'classementGeneraleEtapes' => $classementGeneraleEtapes]);
+
+        $classementGenerales = ViewClassementGenerale::all();
+
+        return view('html.classement', ['classementGeneraleCoureurs' => $classementGeneraleCoureurs,'classementGeneraleEquipes' => $classementGeneraleEquipes,'classementGeneraleEtapes' => $classementGeneraleEtapes,'classementGenerales' => $classementGenerales]);
     }
     public function classementEquipe()
     {

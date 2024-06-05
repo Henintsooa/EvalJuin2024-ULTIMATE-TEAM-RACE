@@ -26,9 +26,9 @@
                 <div class="table-responsive">
                     <form method="POST" action="/affecterCoureur">
                         @csrf
-                        @for ($i = 0; $i < $nbrCoureur; $i++)
+                        {{-- @for ($i = 0; $i < $nbrCoureur; $i++) --}}
                             <div class="mb-3">
-                                <label for="coureur{{ $i }}" class="form-label">Coureur</label>
+                                <label for="coureur" class="form-label">Coureur</label>
                                 <select class="form-select" id="" aria-describedby="" name="idCoureurs[]">
                                     <option value="">Selectionner un coureur</option>
                                     @foreach ($coureurs as $coureur)
@@ -36,7 +36,7 @@
                                     @endforeach
                                 </select>
                             </div>                   
-                        @endfor                        
+                        {{-- @endfor                         --}}
                         <input type="hidden" name="idEtape" value="{{ $idEtape }}">
 
                         <button type="submit" id="submitBtn" class="btn btn-primary">Valider</button>
