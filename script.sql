@@ -573,6 +573,22 @@ GROUP BY
     c.genre,
     p.total_tempspenalite;
 
+---------------------------------Alea
+create or replace view sommePointJoueur as 
+select  v.nomcoureur,v.idequipe,v.nomEquipe,sum(v.points) as pointstotal
+from viewpointscoureuretape v
+group by v.nomcoureur,v.idequipe,
+    v.nomEquipe
+
+create or replace view sommePointEtape as 
+select v.rangetape,v.nometape,v.nomcoureur,v.idequipe,v.nomEquipe,sum(v.points) as pointstotal 
+from viewpointscoureuretape v
+group by v.nomcoureur,v.idequipe,
+    v.nomEquipe,v.nometape,v.rangetape
+order by v.nometape asc
+
+
+
 
 
 INSERT INTO "public".resultatcoureur(idresultatcoureur, idcoureur, idetape, heuredebut, heurefin, duree)

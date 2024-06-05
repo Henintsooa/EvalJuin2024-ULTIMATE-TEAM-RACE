@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/classementCoureurEtape', [AdminController::class, 'classementCoureurEtape'])->name('classementCoureurEtape'); 
 Route::get('/classementCoureur', [AdminController::class, 'classementCoureur'])->name('classementCoureur'); 
 
+
+Route::get('/sommePointJoueur', [AdminController::class, 'sommePointJoueur'])->name('sommePointJoueur');
 Route::get('/pdfCertificat', [AdminController::class, 'pdfCertificat'])->name('pdfCertificat');
 
 Route::get('/showCertificat', [AdminController::class, 'showCertificat'])->name('showCertificat');

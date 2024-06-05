@@ -30,7 +30,7 @@
                           <p class="mb-0 fw-normal"> {{ $classementGenerale->classementgeneral }}</p>
                           </td>
                           <td class="">
-                          <p class="mb-0 fw-normal"> {{ $classementGenerale->nomequipe }}</p>
+                          <a href="{{ route('sommePointJoueur',['idequipe' => $classementGenerale->idequipe])}}" class="mb-0 fw-normal"> <p>{{ $classementGenerale->nomequipe }}</p>
                           </td>
                           <td class="">
                           <p class="mb-0 fw-normal"> {{ $classementGenerale->totalpoints }} </p>
@@ -110,6 +110,14 @@
                         </tr>
                       </thead>
                       <tbody>
+                        @php
+                          $recurenceTotalpoints = [];
+                        @endphp
+                        @foreach ($classementGeneraleCategories as $classement )
+                        @php
+                        $recurenceTotalpoints[] = $classement->totalpoints;
+                        @endphp
+                        @endforeach
                         @foreach ($classementGeneraleCategories as $classement)
                         <tr>
                           <td class="">
@@ -118,8 +126,14 @@
                           <td class="">
                             <p class="mb-0 fw-normal"> {{ $classement->nomequipe }}</p>
                           </td>
-                          <td class="">
-                            <p class="mb-0 fw-normal"> {{ $classement->totalpoints }} </p>
+                            <td class="">
+                            
+                            @if(count(array_keys($recurenceTotalpoints, $classement->totalpoints)) > 1)
+                              <p style="color: red" class="mb-0 fw-normal"> {{ $classement->totalpoints }} </p>
+                            @else
+                              <p class="mb-0 fw-normal"> {{ $classement->totalpoints }} </p>
+                            @endif
+                            </td>
                           </td>
                         </tr>
                         @endforeach

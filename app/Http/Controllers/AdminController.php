@@ -371,4 +371,14 @@ class AdminController extends Controller
         // dd($classementGeneraleEtapes);
         return view('html.classementCoureurEtape', ['classementGeneraleEtapes' => $classementGeneraleEtapes]);
     }
+
+    public function sommePointJoueur()
+    {
+        $idequipe = $_GET['idequipe'];       
+
+        $sommePointJoueurs = DB::table('sommepointjoueur')->where('idequipe', $idequipe)->orderBy('pointstotal','desc')->get();
+        $sommePointEtapes = DB::table('sommepointetape')->where('idequipe', $idequipe)->orderBy('rangetape','asc')->get();
+        
+        return view('html.sommePointJoueur', ['sommePointJoueurs' => $sommePointJoueurs,'sommePointEtapes' => $sommePointEtapes]);
+    }
 }
