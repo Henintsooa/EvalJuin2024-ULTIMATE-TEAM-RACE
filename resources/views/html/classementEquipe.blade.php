@@ -119,7 +119,7 @@
                         @endphp
                         @endforeach
                         @foreach ($classementGeneraleCategories as $classement)
-                        <tr>
+                        <tr @if(count(array_keys($recurenceTotalpoints, $classement->totalpoints)) > 1) style="background-color: #ffc0cb;" @endif>
                           <td class="">
                             <p class="mb-0 fw-normal"> {{ $classement->classement }}</p>
                           </td>
@@ -127,12 +127,7 @@
                             <p class="mb-0 fw-normal"> {{ $classement->nomequipe }}</p>
                           </td>
                             <td class="">
-                            
-                            @if(count(array_keys($recurenceTotalpoints, $classement->totalpoints)) > 1)
-                              <p style="color: red" class="mb-0 fw-normal"> {{ $classement->totalpoints }} </p>
-                            @else
                               <p class="mb-0 fw-normal"> {{ $classement->totalpoints }} </p>
-                            @endif
                             </td>
                           </td>
                         </tr>
